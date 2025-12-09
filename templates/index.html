@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Used Car Price Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 5px;
+            text-align: center;
+            font-size: 24px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            margin-bottom: 4px;
+            color: #333;
+            font-weight: 500;
+            font-size: 13px;
+        }
+        
+        input, select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
+            border-radius: 5px;
+            display: none;
+            border-left: 4px solid #667eea;
+        }
+        
+        .result.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result-label {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .price-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .price-box {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .currency {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 3px;
+        }
+        
+        .result-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .result-info {
+            font-size: 11px;
+            color: #999;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .error {
+            background: #ffe0e0;
+            color: #d32f2f;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+            font-size: 13px;
+            border-left: 4px solid #d32f2f;
+        }
+        
+        .error.show {
+            display: block;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Scrollbar styling */
+        .container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .container::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+        
+        .container::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .form-row {
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+            
+            input, select, button {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 Car Price Predictor</h1>
+        <p class="subtitle">Estimate used car price in EUR & INR</p>
+        
+        <form id="predictionForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="vehicleType">Vehicle Type</label>
+                    <select id="vehicleType" name="vehicleType" required>
+                        <option value="">Select</option>
+                        <option value="suv">SUV</option>
+                        <option value="sedan">Sedan</option>
+                        <option value="small_car">Small Car</option>
+                        <option value="wagon">Wagon</option>
+                        <option value="convertible">Convertible</option>
+                        <option value="coupe">Coupe</option>
+                        <option value="bus">Bus</option>
+                        <option value="van">Van</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="gearbox">Gearbox</label>
+                    <select id="gearbox" name="gearbox" required>
+                        <option value="">Select</option>
+                        <option value="manual">Manual</option>
+                        <option value="automatic">Automatic</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fuelType">Fuel Type</label>
+                    <select id="fuelType" name="fuelType" required>
+                        <option value="">Select</option>
+                        <option value="petrol">Petrol</option>
+                        <option value="diesel">Diesel</option>
+                        <option value="electric">Electric</option>
+                        <option value="hybrid">Hybrid</option>
+                        <option value="lpg">LPG</option>
+                        <option value="cng">CNG</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="powerPS">Power (PS)</label>
+                    <input type="number" id="powerPS" name="powerPS" min="30" max="600" placeholder="e.g., 120" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="brand">Brand</label>
+                    <select id="brand" name="brand" required>
+                        <option value="">Select</option>
+                        <option value="volkswagen">Volkswagen</option>
+                        <option value="audi">Audi</option>
+                        <option value="bmw">BMW</option>
+                        <option value="mercedes_benz">Mercedes-Benz</option>
+                        <option value="opel">Opel</option>
+                        <option value="ford">Ford</option>
+                        <option value="renault">Renault</option>
+                        <option value="peugeot">Peugeot</option>
+                        <option value="fiat">Fiat</option>
+                        <option value="seat">Seat</option>
+                        <option value="skoda">Skoda</option>
+                        <option value="hyundai">Hyundai</option>
+                        <option value="kia">Kia</option>
+                        <option value="mazda">Mazda</option>
+                        <option value="toyota">Toyota</option>
+                        <option value="nissan">Nissan</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="kilometerUsed">Kilometers Used</label>
+                    <input type="number" id="kilometerUsed" name="kilometerUsed" min="0" max="300000" placeholder="e.g., 80000" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="purchaseDate">Purchase Date</label>
+                    <input type="date" id="purchaseDate" name="purchaseDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notRepairedDamage">Unrepaired Damage</label>
+                    <select id="notRepairedDamage" name="notRepairedDamage" required>
+                        <option value="">Select</option>
+                        <option value="yes">Yes</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button type="submit">Predict Price</button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+        </div>
+        
+        <div class="result" id="result">
+            <div class="result-label">Predicted Price</div>
+            <div class="price-display">
+                <div class="price-box">
+                    <div class="currency">EUR €</div>
+                    <div class="result-value">€<span id="priceEur">0</span></div>
+                </div>
+                <div class="price-box">
+                    <div class="currency">INR ₹</div>
+                    <div class="result-value">₹<span id="priceInr">0</span></div>
+                </div>
+            </div>
+            <div class="result-info">
+                Model: <strong id="modelName"></strong><br>
+                MAE: €<strong id="maeEur"></strong> | ₹<strong id="maeInr"></strong>
+            </div>
+        </div>
+        
+        <div class="error" id="error"></div>
+    </div>
+    
+    <script>
+        // Set today's date as max date
+        document.getElementById('purchaseDate').max = new Date().toISOString().split('T')[0];
+        
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('error').classList.remove('show');
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('priceEur').textContent = result.prediction_eur.toLocaleString('de-DE');
+                    document.getElementById('priceInr').textContent = result.prediction_inr.toLocaleString('en-IN');
+                    document.getElementById('modelName').textContent = result.model;
+                    document.getElementById('maeEur').textContent = result.mae_eur.toLocaleString('de-DE');
+                    document.getElementById('maeInr').textContent = result.mae_inr.toLocaleString('en-IN');
+                    document.getElementById('result').classList.add('show');
+                } else {
+                    document.getElementById('error').textContent = '❌ Error: ' + result.error;
+                    document.getElementById('error').classList.add('show');
+                }
+            } catch (error) {
+                document.getElementById('error').textContent = '❌ Network error: ' + error.message;
+                document.getElementById('error').classList.add('show');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

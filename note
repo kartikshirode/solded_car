@@ -1,0 +1,10 @@
+new_car = {
+    "vehicleType": "suv",
+    "gearbox": "manual",
+    "fuelType": "diesel",
+    "brand": "volkswagen",
+    "notRepairedDamage": "no",
+    "powerPS": 120,
+    "kilometer": 80000,
+    "TimeforRegistration": 8 * 12
+}
